@@ -117,8 +117,8 @@ struct DynamicFieldInfoHelper {
   static absl::string_view GetStringView(const Reflection* reflection,
                                          const Message& message,
                                          const FieldDescriptor* field) {
-    auto ctype = cpp::EffectiveStringCType(field);
-    ABSL_DCHECK_NE(ctype, FieldOptions::CORD);
+    auto string_type = field->cpp_string_type();
+    ABSL_DCHECK(string_type != FieldDescriptor::CppStringType::kCord);
     ABSL_DCHECK(!is_oneof || reflection->HasOneofField(message, field));
     auto str = Get<ArenaStringPtr>(reflection, message, field);
     ABSL_DCHECK(!str.IsDefault());
@@ -856,6 +856,34 @@ struct RepeatedStringDynamicFieldInfo
   static constexpr bool is_extension = false;     // NOLINT
   static constexpr bool is_oneof = false;         // NOLINT
   static constexpr bool is_cord = false;          // NOLINT
+  static constexpr bool is_string_piece = false;  // NOLINT
+};
+
+template <typename MessageT>
+struct RepeatedCordDynamicFieldInfo
+    : RepeatedEntityDynamicFieldInfoBase<MessageT, absl::Cord> {
+  using BaseT = RepeatedEntityDynamicFieldInfoBase<MessageT, absl::Cord>;
+
+  constexpr RepeatedCordDynamicFieldInfo(const Reflection* r, MessageT& m,
+                                         const FieldDescriptor* f,
+                                         const RepeatedField<absl::Cord>& rep)
+      : BaseT(r, m, f, rep) {}
+
+  size_t FieldByteSize() const {
+    size_t byte_size = 0;
+    for (auto& it : BaseT::const_repeated) {
+      byte_size += WireFormatLite::LengthDelimitedSize(it.size());
+    }
+    return byte_size;
+  }
+
+  static constexpr FieldDescriptor::CppType cpp_type =  // NOLINT
+      FieldDescriptor::CPPTYPE_STRING;
+  static constexpr bool is_repeated = true;       // NOLINT
+  static constexpr bool is_map = false;           // NOLINT
+  static constexpr bool is_extension = false;     // NOLINT
+  static constexpr bool is_oneof = false;         // NOLINT
+  static constexpr bool is_cord = true;           // NOLINT
   static constexpr bool is_string_piece = false;  // NOLINT
 };
 
