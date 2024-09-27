@@ -113,6 +113,8 @@ struct ConstructorTag {
 
   bool operator<(const ConstructorTag&) const { return false; }
 
+  bool operator==(const ConstructorTag&) const { return true; }
+
   ConstructorType invoked_constructor;
 };
 
@@ -315,16 +317,6 @@ TEST_F(MapImplTest, OperatorBracket) {
 }  // namespace protobuf
 }  // namespace google
 
-namespace std {
-
-template <>  // NOLINT
-struct hash<google::protobuf::internal::MoveTestKey> {
-  size_t operator()(const google::protobuf::internal::MoveTestKey& key) const {
-    return hash<uint64_t>{}(key.data);
-  }
-};
-}  // namespace std
-
 namespace google {
 namespace protobuf {
 namespace internal {
@@ -341,6 +333,44 @@ struct RealKeyToVariantKeyAlternative<MoveTestKey> {
   VariantKey operator()(const MoveTestKey& value) const {
     return VariantKey(value.data);
   }
+};
+
+template <>
+struct TransparentSupport<MoveTestKey> {
+  // We hash all the scalars as uint64_t so that we can implement the same hash
+  // function for VariantKey. This way we can have MapKey provide the same hash
+  // as the underlying value would have.
+  using hash = absl::Hash<MoveTestKey>;
+
+  static bool Equals(const MoveTestKey& a, const MoveTestKey& b) {
+    return a == b;
+  }
+
+  template <typename K>
+  using key_arg = MoveTestKey;
+
+  using ViewType = const MoveTestKey&;
+
+  static ViewType ToView(ViewType v) { return v; }
+};
+
+template <>
+struct TransparentSupport<ConstructorTag> {
+  // We hash all the scalars as uint64_t so that we can implement the same hash
+  // function for VariantKey. This way we can have MapKey provide the same hash
+  // as the underlying value would have.
+  using hash = absl::Hash<ConstructorTag>;
+
+  static bool Equals(const ConstructorTag& a, const ConstructorTag& b) {
+    return a == b;
+  }
+
+  template <typename K>
+  using key_arg = ConstructorTag;
+
+  using ViewType = const ConstructorTag&;
+
+  static ViewType ToView(ViewType v) { return v; }
 };
 
 namespace {
