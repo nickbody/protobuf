@@ -19,6 +19,8 @@ import static com.google.protobuf.util.Timestamps.NANOS_PER_MICROSECOND;
 import static com.google.protobuf.util.Timestamps.NANOS_PER_MILLISECOND;
 import static com.google.protobuf.util.Timestamps.NANOS_PER_SECOND;
 
+import com.google.common.annotations.GwtIncompatible;
+import com.google.common.base.Strings;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CompileTimeConstant;
 import com.google.protobuf.Duration;
@@ -140,6 +142,8 @@ public final class Durations {
    * @throws NullPointerException if {@code duration} is {@code null}
    */
   @CanIgnoreReturnValue
+  @GwtIncompatible(
+      "uses reflection to access methods of java.time.Instant") // TODo another comment - toString
   public static Duration checkNotNegative(Duration duration) {
     checkArgument(!isNegative(duration), "duration (%s) must not be negative", toString(duration));
     return duration;
@@ -152,6 +156,8 @@ public final class Durations {
    * @throws NullPointerException if {@code duration} is {@code null}
    */
   @CanIgnoreReturnValue
+  @GwtIncompatible(
+      "uses reflection to access methods of java.time.Instant") // TODo another comment - toString
   public static Duration checkPositive(Duration duration) {
     checkArgument(isPositive(duration), "duration (%s) must be positive", toString(duration));
     return duration;
@@ -164,7 +170,7 @@ public final class Durations {
     int nanos = duration.getNanos();
     if (!isValid(seconds, nanos)) {
       throw new IllegalArgumentException(
-          String.format(
+          Strings.lenientFormat(
               "Duration is not valid. See proto definition for valid values. "
                   + "Seconds (%s) must be in range [-315,576,000,000, +315,576,000,000]. "
                   + "Nanos (%s) must be in range [-999,999,999, +999,999,999]. "
@@ -193,6 +199,7 @@ public final class Durations {
    * @return The string representation of the given duration.
    * @throws IllegalArgumentException if the given duration is not in the valid range.
    */
+  @GwtIncompatible("uses reflection to access methods of java.time.Instant") // TODo another comment
   public static String toString(Duration duration) {
     checkValid(duration);
 
@@ -220,6 +227,8 @@ public final class Durations {
    * @return a Duration parsed from the string
    * @throws ParseException if the string is not in the duration format
    */
+  @GwtIncompatible(
+      "uses reflection to access methods of java.time.Instant") // TODO message parseException
   public static Duration parse(String value) throws ParseException {
     // Must end with "s".
     if (value.isEmpty() || value.charAt(value.length() - 1) != 's') {
@@ -264,6 +273,7 @@ public final class Durations {
    * @return a {@link Duration} parsed from the string
    * @throws IllegalArgumentException if parsing fails
    */
+  @GwtIncompatible("uses reflection to access methods of java.time.Instant")
   public static Duration parseUnchecked(@CompileTimeConstant String value) {
     try {
       return parse(value);
