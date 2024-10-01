@@ -475,7 +475,16 @@ void PyiGenerator::PrintMessage(
   }
 
   // Prints __init__
-  printer_->Print("def __init__(self");
+  printer_->Print("def __init__(");
+  // If the message has a field named "self" (see b/144146793), it can still be
+  // passed to the initializer, which takes those as **kwargs. To avoid name
+  // collision, we rename the self parameter by appending underscores until it
+  // no longer collides. The self-parameter is in fact positional-only, so the
+  // name in the pyi doesn't matter with regard to what runtime usage is valid.
+  // Note that we currently can't have both "self" and "self_" fields because
+  // it's not allowed to have two fields where the default JSON names collide.
+  printer_->Print(
+      message_descriptor.FindFieldByName("self") == nullptr ? "self" : "self_");
   bool has_key_words = false;
   bool is_first = true;
   for (int i = 0; i < message_descriptor.field_count(); ++i) {
@@ -485,12 +494,6 @@ void PyiGenerator::PrintMessage(
       continue;
     }
     std::string field_name = std::string(field_des->name());
-    if (is_first && field_name == "self") {
-      // See b/144146793 for an example of real code that generates a (self,
-      // self) method signature. Since repeating a parameter name is illegal in
-      // Python, we rename the duplicate self.
-      field_name = "self_";
-    }
     is_first = false;
     printer_->Print(", $field_name$: ", "field_name", field_name);
     Annotate("field_name", field_des);
