@@ -20,7 +20,7 @@ namespace Google.Protobuf.Examples.AddressBook
         private static Person PromptForAddress(TextReader input, TextWriter output)
         {
             Person person = new Person();
-
+            
             output.Write("Enter person ID: ");
             person.Id = int.Parse(input.ReadLine());
 

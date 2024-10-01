@@ -7,6 +7,7 @@
 // https://developers.google.com/open-source/licenses/bsd
 #endregion
 
+using Google.Protobuf.Examples.Sprayer;
 using System;
 
 namespace Google.Protobuf.Examples.AddressBook
@@ -27,13 +28,14 @@ namespace Google.Protobuf.Examples.AddressBook
                 return 1;
             }
             string addressBookFile = args.Length > 0 ? args[0] : "addressbook.data";
+            string djmdFile = args.Length > 0 ? args[0] : "djmd.data";
 
             bool stopping = false;
             while (!stopping)
             {
                 Console.WriteLine("Options:");
                 Console.WriteLine("  L: List contents");
-                Console.WriteLine("  A: Add new person");
+                Console.WriteLine("  A: Add new record");
                 Console.WriteLine("  Q: Quit");
                 Console.Write("Action? ");
                 Console.Out.Flush();
@@ -45,11 +47,13 @@ namespace Google.Protobuf.Examples.AddressBook
                     {
                         case 'A':
                         case 'a':
-                            AddPerson.Main(new string[] {addressBookFile});
+                            AddDjmd.Main(new string[] { djmdFile });
+                            //AddPerson.Main(new string[] {addressBookFile});
                             break;
                         case 'L':
                         case 'l':
-                            ListPeople.Main(new string[] {addressBookFile});
+                            ListDjmd.Main(new string[] { djmdFile });
+                            //ListPeople.Main(new string[] { addressBookFile });
                             break;
                         case 'Q':
                         case 'q':

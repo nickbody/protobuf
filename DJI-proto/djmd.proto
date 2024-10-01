@@ -1,0 +1,196 @@
+syntax = "proto3";
+package sprayer;
+
+// [START csharp_declaration]
+option csharp_namespace = "Google.Protobuf.Examples.Sprayer";
+// [END csharp_declaration]
+
+/**
+ * Represents the positioning coordinates expressed in latitude and longitude.
+ */
+message PositionCoord {
+  enum PositionCoordUnit {
+    UNIT_RAD = 0;                                   /** The unit of positioning coordinates is radian. */
+    UNIT_DEG = 1;                                   /** The unit of positioning coordinates is degree. */
+  }
+  PositionCoordUnit position_coord_unit = 1;          /** The unit of positioning coordinates. */
+  double latitude = 2;                                /** The latitude, WGS-84 coordinate system. */
+  double longitude = 3;                               /** The longitude, WGS-84 coordinate system. */
+}
+
+/**
+ * Represents the time of GPS.
+ */
+message GpsTime {
+  string time = 1;                                   /** The GPS time,format: YYYY-MM-DD HH-MM-SS. */
+}
+
+/**
+ * Represents the basic information for GPS.
+ */
+message GpsBasic {
+  PositionCoord gps_coordinates = 1;                  /** The GPS latitude and longitude coordinates. */
+  int32 gps_altitude_mm = 2;                          /** The GPS altitude, unit: mm, refer to gps_altitude_type for
+                                                            details. */
+  enum GpsStatus {
+    GPS_NORMAL = 0;                                 /** The GPS status is normal. */
+    GPS_INVALID = 1;                                /** The GPS status is invalid. */
+    GPS_RTK = 2;                                    /** The GPS status is RTK. */
+  }
+  GpsStatus gps_status = 3;                           /** The GPS status. */
+  enum GpsAltType {
+    PRESSURE_ALTITUDE = 0;                          /** The altitude is provided by barometer which is not
+                                                            ellipsoidal height. */
+    GPS_FUSION_ALTITUDE = 1;                        /** Fuse GPS and barometer height, which based on ellipsoidal
+                                                            coordinate. */
+    RTK_ALTITUDE = 2;                               /** The altitude is ellipsoidal height (WGS-84) provided by
+                                                            RTK. */
+  }
+  GpsAltType gps_altitude_type = 4;                   /** The GPS altitude type. */
+
+  bool has_gps_time_ = 5;                              /** The GPS time valid flag. */
+  GpsTime gps_time = 6;                               /** The GPS time */
+}
+
+message HeaderText {
+  string proto = 1;
+  string ver1 = 2;
+  string ver2 = 3;
+  string sn = 5;
+  string firmware = 6;
+  uint64 timestamp_us = 9;
+  string camera = 10;
+}
+
+message HeaderSect2 {
+  uint32 value1 = 1;
+  uint32 value2 = 2;
+}
+
+message HeaderSect9 {
+  uint32 value1 = 1;
+}
+
+message Header {
+  HeaderText header_text = 1;
+  HeaderSect2 header_sect2 = 2;
+  HeaderSect9 header_sect9 = 9;
+}
+
+
+message SecondHeaderName {
+  string track = 3;
+}
+
+message SecondHeaderFrame {
+  uint32 width = 1;
+  uint32 height = 2;
+  float frame_rate = 3;
+  uint32 value1 = 4;
+  uint32 value2 = 5;
+  uint32 value3 = 6;
+  uint32 value4 = 8;
+}
+
+message SecondHeaderEmpty {
+}
+
+message SecondHeaderValue {
+  uint32 value1 = 1;
+}
+
+message SecondHeader {
+  SecondHeaderName second_header_name = 1;
+  SecondHeaderFrame second_header_frame = 3;
+  SecondHeaderEmpty second_header_empty = 4;
+  SecondHeaderValue second_header_value = 5;
+}
+
+
+message GpsTimestampStruct {
+  uint32 frameindex = 1;
+  uint64 frame_timestamp_us = 2;
+}
+
+message ImuVal1Struct {
+  float value1 = 1;
+}
+
+message ImuVal2Struct {
+  float value1 = 1;
+}
+
+message ImuChunk1Struct {
+  bytes value1 = 1;
+}
+
+message ImuVal3Struct {
+  float value1 = 1;
+}
+
+message ImuVal4Struct {
+  uint32 value1 = 1;
+}
+
+message ImuEmptyStruct {
+}
+
+message ImuQuaternionStruct {
+  float w = 1;
+  float x = 2;
+  float y = 3;
+  float z = 4;
+}
+
+message ImuGravityStruct {
+  float x = 2;
+  float y = 3;
+  float z = 4;
+}
+
+message ImuStruct {
+  ImuVal1Struct imu_val1_struct = 2;
+  ImuVal2Struct imu_val2_struct = 3;
+  ImuChunk1Struct imu_chunk1_struct = 4;
+  ImuVal3Struct imu_val3_struct = 5;
+  ImuVal4Struct imu_val4_struct = 6;
+  ImuEmptyStruct imu_empty7_struct = 7;
+  ImuEmptyStruct imu_empty8_struct = 8;
+  ImuQuaternionStruct imu_quaternion_struct = 9;
+  ImuGravityStruct imu_gravity_struct = 10;
+  ImuEmptyStruct imu_empty11_struct = 11;
+  ImuEmptyStruct imu_empty12_struct = 12;
+}
+
+message GpsWrapperHeaderStruct {
+  uint32 value1 = 1;
+  uint32 value2 = 2;
+  string ac003 = 3;
+  float frame_rate = 4;
+}
+
+message VelocityStruct {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message GpsWrapperStruct {
+  GpsWrapperHeaderStruct gps_wrapper_header_struct = 1;
+  GpsBasic gps_basic_struct = 2;
+  VelocityStruct velocity_struct = 3;
+}
+
+message GpsDataStruct {
+  GpsTimestampStruct gps_timestamp_struct = 1;
+  ImuStruct imu_struct = 2;
+  GpsWrapperStruct gps_wrapper_struct = 4;
+}
+
+
+// Our djmd file is just one of these.
+message DjmdFile {
+  Header header = 1;
+  SecondHeader second_header = 2;
+  repeated GpsDataStruct gps = 3;
+}
