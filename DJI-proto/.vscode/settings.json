@@ -1,7 +1,7 @@
 {
     "protoc": {
         "options": [
-            "--proto_path=C:/Dev/Sprayer/protobuf/DJI-proto",
+            "--proto_path=c:/Dev/Sprayer/protobuf/DJI-proto",
             "--csharp_out=C:/Dev/Sprayer/protobuf/csharp/src/AddressBook"
         ]
     }
